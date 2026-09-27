@@ -2,16 +2,17 @@ import { useState } from "react";
 import { typeLabel, statusMeta, colorForGenre } from "../constants";
 import SourcesModal from "./SourcesModal";
 
-export default function SeriesCard({ series, genresById, onEdit, onDeleteRequest }) {
+const MAX_VISIBLE_GENRES = 3;
+
+export default function SeriesCard({ series, genresById, onView, onEdit, onDeleteRequest }) {
   const [sourcesOpen, setSourcesOpen] = useState(false);
 
   const status = statusMeta(series.status);
-  const genres = (series.genre_ids || [])
-    .map((id) => genresById[id])
-    .filter(Boolean)
-    .slice(0, 3);
+  const allGenres = (series.genre_ids || []).map((id) => genresById[id]).filter(Boolean);
+  const visibleGenres = allGenres.slice(0, MAX_VISIBLE_GENRES);
+  const remainingCount = allGenres.length - visibleGenres.length;
 
-  const spineColor = genres[0] ? colorForGenre(genres[0]) : "var(--accent)";
+  const spineColor = visibleGenres[0] ? colorForGenre(visibleGenres[0]) : "var(--accent)";
 
   const hasTotal = series.total_progress !== null && series.total_progress !== undefined;
   const progressPct =
@@ -31,10 +32,13 @@ export default function SeriesCard({ series, genresById, onEdit, onDeleteRequest
           <span className="book-type-chip">{typeLabel(series.series_type)}</span>
 
           <div className="book-hover-actions">
-            <button className="btn btn-small" onClick={() => onEdit(series)}>
+            <button className="book-action-btn" onClick={() => onView(series)}>
+              View
+            </button>
+            <button className="book-action-btn" onClick={() => onEdit(series)}>
               Edit
             </button>
-            <button className="btn btn-small btn-danger" onClick={() => onDeleteRequest(series)}>
+            <button className="book-action-btn book-action-btn-danger" onClick={() => onDeleteRequest(series)}>
               Delete
             </button>
           </div>
@@ -49,13 +53,16 @@ export default function SeriesCard({ series, genresById, onEdit, onDeleteRequest
             {series.rating != null && <span className="book-rating">★ {series.rating.toFixed(1)}</span>}
           </div>
 
-          {genres.length > 0 && (
+          {visibleGenres.length > 0 && (
             <div className="book-genres">
-              {genres.map((g) => (
+              {visibleGenres.map((g) => (
                 <span key={g.id} className="genre-badge" style={{ "--chip-color": colorForGenre(g) }}>
                   {g.name}
                 </span>
               ))}
+              {remainingCount > 0 && (
+                <span className="genre-badge genre-badge-more">+{remainingCount} more</span>
+              )}
             </div>
           )}
 

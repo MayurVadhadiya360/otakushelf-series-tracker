@@ -1,4 +1,8 @@
+import useBodyScrollLock from "../hooks/useBodyScrollLock";
+
 export default function SourcesModal({ open, title, sources, onClose }) {
+  useBodyScrollLock(open);
+
   if (!open) return null;
 
   return (

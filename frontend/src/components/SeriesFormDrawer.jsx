@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { SERIES_TYPES, SERIES_STATUSES } from "../constants";
 import GenreInput from "./GenreInput";
 import SourcesInput from "./SourcesInput";
+import useBodyScrollLock from "../hooks/useBodyScrollLock";
 
 const emptyForm = {
   title: "",
@@ -27,6 +28,8 @@ export default function SeriesFormDrawer({
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  useBodyScrollLock(open);
 
   useEffect(() => {
     if (initialValue) {

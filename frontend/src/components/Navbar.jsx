@@ -20,20 +20,31 @@ export default function Navbar({ onExport, onImportClick }) {
 
         {user && (
           <nav className="navbar-actions">
-            <button className="btn btn-ghost btn-small" onClick={onExport}>
-              Export
-            </button>
-            <button className="btn btn-ghost btn-small" onClick={onImportClick}>
-              Import
-            </button>
-            <Link to="/settings" className="btn btn-ghost btn-small">
-              Genres
-            </Link>
+            <div className="navbar-group">
+              <button className="navbar-group-btn" onClick={onExport}>
+                Export
+              </button>
+              <span className="navbar-group-divider" />
+              <button className="navbar-group-btn" onClick={onImportClick}>
+                Import
+              </button>
+              <span className="navbar-group-divider" />
+              <Link to="/settings" className="navbar-group-btn navbar-group-link">
+                Genres
+              </Link>
+            </div>
+
             <ThemeSelector />
-            <span className="navbar-username">{user.username}</span>
-            <button className="btn btn-ghost btn-small" onClick={handleLogout}>
-              Sign out
-            </button>
+
+            <span className="navbar-divider" />
+
+            <div className="navbar-user">
+              <span className="navbar-avatar">{user.username.charAt(0).toUpperCase()}</span>
+              <span className="navbar-username">{user.username}</span>
+              <button className="btn btn-ghost" onClick={handleLogout}>
+                Sign out
+              </button>
+            </div>
           </nav>
         )}
       </div>

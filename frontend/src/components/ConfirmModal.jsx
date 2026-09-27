@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import useBodyScrollLock from "../hooks/useBodyScrollLock";
 
 /**
  * Themed replacement for window.confirm(), used for anything destructive
@@ -19,6 +20,8 @@ export default function ConfirmModal({
   const [checked, setChecked] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+
+  useBodyScrollLock(open);
 
   useEffect(() => {
     if (open) {

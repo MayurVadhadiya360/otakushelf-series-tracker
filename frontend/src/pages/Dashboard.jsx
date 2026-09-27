@@ -3,8 +3,10 @@ import Navbar from "../components/Navbar";
 import StatsStrip from "../components/StatsStrip";
 import SeriesCard from "../components/SeriesCard";
 import SeriesFormDrawer from "../components/SeriesFormDrawer";
+import SeriesDetailModal from "../components/SeriesDetailModal";
 import ConfirmModal from "../components/ConfirmModal";
-import { SERIES_TYPES, SERIES_STATUSES, SORT_OPTIONS, colorForGenre } from "../constants";
+import GenreFilterChips from "../components/GenreFilterChips";
+import { SERIES_TYPES, SERIES_STATUSES, SORT_OPTIONS } from "../constants";
 import { fetchSeries, fetchStats, createSeries, updateSeries, deleteSeries } from "../api/series";
 import { fetchGenres, createGenre } from "../api/genres";
 import { exportData, importData, downloadExport } from "../api/data";
@@ -28,6 +30,7 @@ export default function Dashboard() {
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingSeries, setEditingSeries] = useState(null);
+  const [viewingSeries, setViewingSeries] = useState(null);
 
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [importPreview, setImportPreview] = useState(null); // parsed JSON pending confirmation
@@ -182,83 +185,72 @@ export default function Dashboard() {
 
         <StatsStrip stats={stats} />
 
-        <div className="toolbar">
-          <input
-            type="search"
-            className="search-input"
-            placeholder="Search your shelf…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-
-          <div className="chip-group" role="group" aria-label="Filter by type">
-            <button
-              className={`chip ${typeFilter === "" ? "chip-active" : ""}`}
-              onClick={() => setTypeFilter("")}
-            >
-              All types
-            </button>
-            {SERIES_TYPES.map((t) => (
-              <button
-                key={t.value}
-                className={`chip ${typeFilter === t.value ? "chip-active" : ""}`}
-                onClick={() => setTypeFilter(typeFilter === t.value ? "" : t.value)}
-              >
-                {t.label}
-              </button>
+        <div className="toolbar-header">
+          <select value={sort} onChange={(e) => setSort(e.target.value)} className="sort-select">
+            {SORT_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
             ))}
+          </select>
+          <button className="btn btn-primary" onClick={openAddDrawer}>
+            + Add series
+          </button>
+        </div>
+
+        <div className="filters-block">
+          <div className="filter-row">
+            <input
+              type="search"
+              className="search-input"
+              placeholder="Search your shelf…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
           </div>
 
-          <div className="chip-group" role="group" aria-label="Filter by status">
-            <button
-              className={`chip ${statusFilter === "" ? "chip-active" : ""}`}
-              onClick={() => setStatusFilter("")}
-            >
-              All statuses
-            </button>
-            {SERIES_STATUSES.map((s) => (
+          <div className="filter-row">
+            <div className="chip-group" role="group" aria-label="Filter by type">
               <button
-                key={s.value}
-                className={`chip ${statusFilter === s.value ? "chip-active" : ""}`}
-                onClick={() => setStatusFilter(statusFilter === s.value ? "" : s.value)}
+                className={`chip ${typeFilter === "" ? "chip-active" : ""}`}
+                onClick={() => setTypeFilter("")}
               >
-                {s.label}
+                All types
               </button>
-            ))}
-          </div>
-
-          {genres.length > 0 && (
-            <div className="chip-group" role="group" aria-label="Filter by genre">
-              <button
-                className={`chip ${genreFilter === "" ? "chip-active" : ""}`}
-                onClick={() => setGenreFilter("")}
-              >
-                All genres
-              </button>
-              {genres.map((g) => (
+              {SERIES_TYPES.map((t) => (
                 <button
-                  key={g.id}
-                  className={`chip ${genreFilter === g.id ? "chip-active" : ""}`}
-                  style={genreFilter === g.id ? { background: colorForGenre(g), borderColor: colorForGenre(g) } : undefined}
-                  onClick={() => setGenreFilter(genreFilter === g.id ? "" : g.id)}
+                  key={t.value}
+                  className={`chip ${typeFilter === t.value ? "chip-active" : ""}`}
+                  onClick={() => setTypeFilter(typeFilter === t.value ? "" : t.value)}
                 >
-                  {g.name}
+                  {t.label}
                 </button>
               ))}
             </div>
-          )}
+          </div>
 
-          <div className="toolbar-right">
-            <select value={sort} onChange={(e) => setSort(e.target.value)} className="sort-select">
-              {SORT_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
+          <div className="filter-row">
+            <div className="chip-group" role="group" aria-label="Filter by status">
+              <button
+                className={`chip ${statusFilter === "" ? "chip-active" : ""}`}
+                onClick={() => setStatusFilter("")}
+              >
+                All statuses
+              </button>
+              {SERIES_STATUSES.map((s) => (
+                <button
+                  key={s.value}
+                  className={`chip ${statusFilter === s.value ? "chip-active" : ""}`}
+                  onClick={() => setStatusFilter(statusFilter === s.value ? "" : s.value)}
+                >
+                  {s.label}
+                </button>
               ))}
-            </select>
-            <button className="btn btn-primary" onClick={openAddDrawer}>
-              + Add series
-            </button>
+            </div>
+          </div>
+
+          <div className="filter-row">
+            <GenreFilterChips genres={genres} activeId={genreFilter} onSelect={setGenreFilter} />
           </div>
         </div>
 
@@ -282,6 +274,7 @@ export default function Dashboard() {
                 key={item.id}
                 series={item}
                 genresById={genresById}
+                onView={setViewingSeries}
                 onEdit={openEditDrawer}
                 onDeleteRequest={setDeleteTarget}
               />
@@ -297,6 +290,14 @@ export default function Dashboard() {
         onCreateGenre={handleCreateGenre}
         onClose={() => setDrawerOpen(false)}
         onSubmit={handleSubmit}
+      />
+
+      <SeriesDetailModal
+        open={!!viewingSeries}
+        series={viewingSeries}
+        genresById={genresById}
+        onClose={() => setViewingSeries(null)}
+        onEdit={openEditDrawer}
       />
 
       <ConfirmModal
