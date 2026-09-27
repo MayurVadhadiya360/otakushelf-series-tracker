@@ -1,0 +1,19 @@
+# Production setup: one container, built from the repo root, running
+# FastAPI + uvicorn, which serves both the API and the built React app.
+#
+# Usage:
+#   docker compose -f docker-compose.prod.yml up --build -d
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: otakushelf
+    restart: always
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    volumes:
+      - ./app_data:/app/app_data
+    environment:
+      - CONFIG_PATH=/app/app_data/config.json

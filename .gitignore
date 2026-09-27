@@ -1,0 +1,18 @@
+# Sensitive/local config and data — never commit these
+app_data/config.json
+app_data/logs/*.log*
+!app_data/logs/.gitkeep
+
+# Backend
+backend/venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.db
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+
+# OS
+.DS_Store

@@ -1,0 +1,19 @@
+{
+  "mongodb": {
+    "connection_string": "mongodb://database:27017/",
+    "database_name": "otakushelf"
+  },
+  "app": {
+    "secret_key": "REPLACE_WITH_A_RANDOM_SECRET_e.g._python3_-c_\"import secrets; print(secrets.token_hex(32))\"",
+    "access_token_expire_minutes": 1440,
+    "debug": false,
+    "cors_origins": [
+      "http://localhost:5173",
+      "http://localhost:8000"
+    ]
+  },
+  "logging": {
+    "level": "INFO",
+    "log_dir": "/app/app_data/logs"
+  }
+}

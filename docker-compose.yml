@@ -1,0 +1,62 @@
+# Development setup: MongoDB runs locally in its own container with a
+# persistent named volume, so data survives `docker compose down` and
+# restarts (only `docker compose down -v` wipes it). The backend runs
+# with --reload and the frontend runs its own Vite dev server.
+#
+# Want to point at MongoDB Atlas (or any remote MongoDB) instead? Just
+# change `mongodb.connection_string` in app_data/config.json — nothing
+# else changes. PyMongo handles local (mongodb://) and Atlas
+# (mongodb+srv://) connection strings identically.
+#
+# For a single-container production build, see docker-compose.prod.yml +
+# Dockerfile.prod instead.
+
+services:
+  database:
+    image: mongo:7
+    container_name: otakushelf-database
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - otakushelf-mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: otakushelf-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/app:/app/app
+      - ./app_data:/app/app_data
+    environment:
+      - CONFIG_PATH=/app/app_data/config.json
+    depends_on:
+      database:
+        condition: service_healthy
+
+  frontend:
+    image: node:20-slim
+    container_name: otakushelf-frontend
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    depends_on:
+      - backend
+
+volumes:
+  otakushelf-mongo-data:
+    driver: local
