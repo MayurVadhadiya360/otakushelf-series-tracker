@@ -229,6 +229,8 @@ export default function Dashboard() {
             </div>
           </div>
 
+          <hr className="filter-divider" />
+
           <div className="filter-row">
             <div className="chip-group" role="group" aria-label="Filter by status">
               <button
@@ -248,6 +250,8 @@ export default function Dashboard() {
               ))}
             </div>
           </div>
+
+          <hr className="filter-divider" />
 
           <div className="filter-row">
             <GenreFilterChips genres={genres} activeId={genreFilter} onSelect={setGenreFilter} />

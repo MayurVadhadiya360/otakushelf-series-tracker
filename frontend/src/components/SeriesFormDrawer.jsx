@@ -194,7 +194,13 @@ export default function SeriesFormDrawer({
             </label>
           </div>
 
-          <label className="field">
+          {/* Plain <div>, not <label>: a <label> with no `for` attribute
+              implicitly forwards clicks to the FIRST form control found
+              inside it. GenreInput renders each chip's delete (×) button
+              before its text input, so an implicit label here would silently
+              remove the first genre whenever the caption, chip text, or any
+              non-button area was clicked. */}
+          <div className="field">
             <span>Genres</span>
             <GenreInput
               allGenres={allGenres}
@@ -202,12 +208,15 @@ export default function SeriesFormDrawer({
               onChange={(ids) => update("genre_ids", ids)}
               onCreateGenre={onCreateGenre}
             />
-          </label>
+          </div>
 
-          <label className="field">
+          {/* Same reasoning as Genres above — SourcesInput also contains
+              multiple buttons/inputs, so it gets a plain <div> too rather
+              than relying on implicit label-to-first-control forwarding. */}
+          <div className="field">
             <span>Where to read / watch it</span>
             <SourcesInput sources={form.sources} onChange={(s) => update("sources", s)} />
-          </label>
+          </div>
 
           <label className="field">
             <span>Notes</span>
